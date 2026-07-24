@@ -127,9 +127,9 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
     map: faceTex,
     metalness: 0.3,
     roughness: 0.2,
-    color: 0xffffff,
+    color: 0xdddddd, // slightly darker base color to reduce glare
     emissive: 0x111111,
-    emissiveIntensity: 0.05,
+    emissiveIntensity: 0.02, // very subtle
   });
 
   // 3. Front Face: Circle pointing directly at camera (+Z)
@@ -151,23 +151,23 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
   scene.add(coin);
 
   // ── Lighting ──
-  const dirLight = new THREE.DirectionalLight(0xfffbe6, 4.0);
+  const dirLight = new THREE.DirectionalLight(0xfffbe6, 2.5); // reduced from 4.0
   dirLight.position.set(4, 6, 6);
   scene.add(dirLight);
 
-  const tealLight = new THREE.PointLight(0x00d4aa, 3.5, 20);
+  const tealLight = new THREE.PointLight(0x00d4aa, 2.0, 20); // reduced from 3.5
   tealLight.position.set(-4, 2, 4);
   scene.add(tealLight);
 
-  const fillLight = new THREE.PointLight(0xffe5a0, 2.5, 15);
+  const fillLight = new THREE.PointLight(0xffe5a0, 1.5, 15); // reduced from 2.5
   fillLight.position.set(3, -3, 3);
   scene.add(fillLight);
 
-  const backLight = new THREE.DirectionalLight(0xffffff, 1.5);
+  const backLight = new THREE.DirectionalLight(0xffffff, 1.0); // reduced from 1.5
   backLight.position.set(-3, 0, -3);
   scene.add(backLight);
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.4); // reduced from 0.8
   scene.add(ambient);
 
   // ── Animate ──
