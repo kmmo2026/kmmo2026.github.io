@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KMMO Explorer</title>
+  <meta name="description" content="Explorador de bloques de KMMO - Red 100% Anónima" />
+  <link rel="icon" type="image/jpg" href="logo.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Estilos específicos del explorador */
+    #explorer-header {
+      padding: 120px 2rem 40px;
+      text-align: center;
+      background: var(--bg);
+    }
+    .explorer-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      max-width: 1100px;
+      margin: 0 auto 3rem;
+    }
+    .stat-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      border-radius: 12px;
+    }
+    .stat-box h4 {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .stat-box .value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--teal);
+    }
+    
+    .blocks-container {
+      max-width: 1100px;
+      margin: 0 auto 5rem;
+      padding: 0 2rem;
+    }
+    .blocks-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+    }
+    .blocks-table th {
+      text-align: left;
+      padding: 0 1rem 1rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: none;
+    }
+    .blocks-table td {
+      padding: 1rem;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .blocks-table tr td:first-child {
+      border-left: 1px solid var(--border);
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+    }
+    .blocks-table tr td:last-child {
+      border-right: 1px solid var(--border);
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+    .blocks-table tr:hover td {
+      background: rgba(0,212,170,0.05);
+      border-color: var(--teal);
+    }
+    .hash-link {
+      color: var(--gold);
+      font-family: 'Space Mono', monospace;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .hash-link:hover { text-decoration: underline; }
+    .mono { font-family: 'Space Mono', monospace; color: var(--text); font-size: 0.9rem; }
+    
+    .loading-spinner {
+      text-align: center;
+      padding: 3rem;
+      color: var(--teal);
+      font-family: 'Space Mono', monospace;
+      animation: pulse 1.5s infinite;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav id="navbar" class="scrolled">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <img src="logo.jpg" alt="KMMO Logo" class="nav-coin" />
+        <span class="nav-brand">KMMO</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="#" style="color:var(--teal)">Explorador</a></li>
+        <li><a href="https://github.com/kmmo2026/kmmo-core" target="_blank" class="btn-nav">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Explorer Header -->
+  <section id="explorer-header">
+    <h1 class="hero-title" style="font-size: 2.5rem; margin-bottom: 1rem;">KMMO <span class="gradient-text">Explorador</span></h1>
+    <p class="hero-sub" style="margin: 0 auto;">Estado de la red en tiempo real</p>
+  </section>
+
+  <!-- Stats -->
+  <div class="explorer-stats">
+    <div class="stat-box">
+      <h4>Último Bloque</h4>
+      <div class="value" id="stat-blocks">Cargando...</div>
+    </div>
+    <div class="stat-box">
+      <h4>Dificultad</h4>
+      <div class="value" id="stat-diff">Cargando...</div>
+    </div>
+    <div class="stat-box">
+      <h4>Recompensa Actual</h4>
+      <div class="value">64 KMO</div>
+    </div>
+    <div class="stat-box">
+      <h4>KMO Minados</h4>
+      <div class="value" id="stat-supply">Cargando...</div>
+    </div>
+  </div>
+
+  <!-- Blocks List -->
+  <div class="blocks-container">
+    <div id="loading" class="loading-spinner">Sincronizando con la red KMMO...</div>
+    <table class="blocks-table" id="blocks-table" style="display:none;">
+      <thead>
+        <tr>
+          <th>Altura</th>
+          <th>Hash</th>
+          <th>Transacciones</th>
+          <th>Minería (KMO)</th>
+          <th>Fecha (UTC)</th>
+        </tr>
+      </thead>
+      <tbody id="blocks-body">
+        <!-- Generado con JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    async function loadExplorerData() {
+      try {
+        // Añadimos timestamp para evitar caché
+        const response = await fetch('data.json?t=' + new Date().getTime());
+        if (!response.ok) throw new Error('No data yet');
+        const data = await response.json();
+        
+        // Actualizar estadísticas
+        document.getElementById('stat-blocks').innerText = data.network.blocks.toLocaleString();
+        document.getElementById('stat-diff').innerText = data.network.difficulty.toFixed(4);
+        
+        // Calcular supply aproximado basado en la altura del bloque (64 KMO por bloque inicial)
+        const supply = data.network.blocks * 64;
+        document.getElementById('stat-supply').innerText = supply.toLocaleString() + ' KMO';
+
+        // Actualizar tabla
+        const tbody = document.getElementById('blocks-body');
+        tbody.innerHTML = '';
+        
+        data.blocks.forEach(block => {
+          const date = new Date(block.time * 1000).toLocaleString('es-ES', { timeZone: 'UTC' });
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class="mono" style="color:var(--teal); font-weight:bold;">${block.height}</td>
+            <td><a href="#" class="hash-link" title="${block.hash}">${block.hash.substring(0, 16)}...${block.hash.substring(56)}</a></td>
+            <td class="mono">${block.tx_count}</td>
+            <td class="mono">64.00</td>
+            <td class="mono" style="color:var(--muted)">${date}</td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('blocks-table').style.display = 'table';
+      } catch (err) {
+        document.getElementById('loading').innerText = 'Esperando el primer bloque publicado...';
+        console.error(err);
+      }
+    }
+
+    // Refrescar cada 10 segundos la página por si hay archivo JSON nuevo
+    loadExplorerData();
+    setInterval(loadExplorerData, 10000);
+  </script>
+</body>
+</html>
