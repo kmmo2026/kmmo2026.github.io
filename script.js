@@ -96,14 +96,16 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
 
   const scene = new THREE.Scene();
 
-  // Camera looking straight at the coin, slightly from above
+  // Camera looking straight at the coin
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-  camera.position.set(0, 1.0, 4.5);
+  camera.position.set(0, 0, 4.5);
   camera.lookAt(0, 0, 0);
 
   // ── Coin geometry: CylinderGeometry(radiusTop, radiusBottom, height, segments)
-  // Group 0 = edge/side, Group 1 = top face, Group 2 = bottom face
+  // By default, CylinderGeometry is aligned along the Y-axis (lying flat like a plate).
+  // We rotate it 90 degrees on X so it stands upright facing the camera.
   const geo = new THREE.CylinderGeometry(1, 1, 0.22, 128, 1, false);
+  geo.rotateX(Math.PI / 2);
 
   // Gold metallic material for the edge
   const goldMat = new THREE.MeshStandardMaterial({
@@ -118,7 +120,6 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
   const texLoader = new THREE.TextureLoader();
   const faceTex = texLoader.load('logo.png');
   faceTex.center.set(0.5, 0.5);
-  faceTex.rotation = Math.PI / 2;
 
   const faceMat = new THREE.MeshStandardMaterial({
     map: faceTex,
@@ -131,8 +132,7 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
 
   // CylinderGeometry: material array [edge, top, bottom]
   const coin = new THREE.Mesh(geo, [goldMat, faceMat, faceMat]);
-  // Tilt ~25° on X so you see the face AND gold edge while it spins on Y axis
-  coin.rotation.x = Math.PI * 0.14;
+  // Coin stands perfectly vertical, no tilt needed
   scene.add(coin);
 
   // ── Lighting ──
