@@ -103,54 +103,55 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
 
   // ── Coin geometry: CylinderGeometry(radiusTop, radiusBottom, height, segments)
   // Group 0 = edge/side, Group 1 = top face, Group 2 = bottom face
-  const geo = new THREE.CylinderGeometry(1, 1, 0.14, 128, 1, false);
+  const geo = new THREE.CylinderGeometry(1, 1, 0.22, 128, 1, false);
 
   // Gold metallic material for the edge
   const goldMat = new THREE.MeshStandardMaterial({
     color: 0xFFD700,
-    metalness: 0.95,
-    roughness: 0.15,
+    metalness: 0.9,
+    roughness: 0.1,
+    emissive: 0xaa7700,
+    emissiveIntensity: 0.15,
   });
 
   // Face material — load the coin image as texture
   const texLoader = new THREE.TextureLoader();
   const faceTex = texLoader.load('logo.png');
-  // Rotate texture 90° so it faces correctly (PNG is top-down, Three expects it flat)
   faceTex.center.set(0.5, 0.5);
   faceTex.rotation = Math.PI / 2;
 
   const faceMat = new THREE.MeshStandardMaterial({
     map: faceTex,
-    metalness: 0.6,
-    roughness: 0.25,
+    metalness: 0.3,
+    roughness: 0.2,
     color: 0xffffff,
+    emissive: 0x111111,
+    emissiveIntensity: 0.05,
   });
 
   // CylinderGeometry: material array [edge, top, bottom]
   const coin = new THREE.Mesh(geo, [goldMat, faceMat, faceMat]);
-  // Tilt slightly so user sees both face AND edge while spinning
   coin.rotation.x = Math.PI * 0.08;
   scene.add(coin);
 
   // ── Lighting ──
-  // Warm top light
-  const dirLight = new THREE.DirectionalLight(0xfff5cc, 2.5);
-  dirLight.position.set(3, 5, 5);
-  dirLight.castShadow = true;
+  const dirLight = new THREE.DirectionalLight(0xfffbe6, 4.0);
+  dirLight.position.set(4, 6, 6);
   scene.add(dirLight);
 
-  // Teal accent point light (KMMO brand color)
-  const tealLight = new THREE.PointLight(0x00d4aa, 3, 15);
-  tealLight.position.set(-3, 2, 3);
+  const tealLight = new THREE.PointLight(0x00d4aa, 3.5, 20);
+  tealLight.position.set(-4, 2, 4);
   scene.add(tealLight);
 
-  // Soft fill light from below
-  const fillLight = new THREE.PointLight(0xffe080, 1.2, 10);
-  fillLight.position.set(2, -3, 2);
+  const fillLight = new THREE.PointLight(0xffe5a0, 2.5, 15);
+  fillLight.position.set(3, -3, 3);
   scene.add(fillLight);
 
-  // Ambient so nothing is pitch black
-  const ambient = new THREE.AmbientLight(0xffffff, 0.3);
+  const backLight = new THREE.DirectionalLight(0xffffff, 1.5);
+  backLight.position.set(-3, 0, -3);
+  scene.add(backLight);
+
+  const ambient = new THREE.AmbientLight(0xffffff, 0.8);
   scene.add(ambient);
 
   // ── Animate ──
