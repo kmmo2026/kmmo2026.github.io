@@ -117,7 +117,9 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
   // Front face (Group 1: top face of cylinder)
   const faceTexFront = texLoader.load('logo.png');
   faceTexFront.center.set(0.5, 0.5);
-  faceTexFront.rotation = Math.PI; // Fix upside-down orientation
+  // Instead of rotating 180 (which mirrors the K), we just flip it vertically
+  faceTexFront.repeat.set(1, -1);
+  faceTexFront.wrapT = THREE.RepeatWrapping;
 
   const faceMatFront = new THREE.MeshStandardMaterial({
     map: faceTexFront,
