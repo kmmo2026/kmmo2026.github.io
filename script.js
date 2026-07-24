@@ -93,12 +93,12 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
   const renderer = new THREE.WebGLRenderer({ canvas: coinCanvas, alpha: true, antialias: true });
   renderer.setSize(SIZE, SIZE);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true;
 
   const scene = new THREE.Scene();
 
-  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
-  camera.position.set(0, 0.4, 4);
+  // Camera looking straight at the coin, slightly from above
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+  camera.position.set(0, 1.0, 4.5);
   camera.lookAt(0, 0, 0);
 
   // ── Coin geometry: CylinderGeometry(radiusTop, radiusBottom, height, segments)
@@ -131,7 +131,8 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
 
   // CylinderGeometry: material array [edge, top, bottom]
   const coin = new THREE.Mesh(geo, [goldMat, faceMat, faceMat]);
-  coin.rotation.x = Math.PI * 0.08;
+  // Tilt ~25° on X so you see the face AND gold edge while it spins on Y axis
+  coin.rotation.x = Math.PI * 0.14;
   scene.add(coin);
 
   // ── Lighting ──
@@ -154,14 +155,10 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
   const ambient = new THREE.AmbientLight(0xffffff, 0.8);
   scene.add(ambient);
 
-  // ── Animate ──
-  let time = 0;
+  // ── Animate: spin only on Y axis ──
   function animate() {
     requestAnimationFrame(animate);
-    time += 0.016;
-    coin.rotation.y += 0.018;
-    // Subtle breathing on tilt
-    coin.rotation.x = Math.PI * 0.08 + Math.sin(time * 0.5) * 0.04;
+    coin.rotation.y += 0.02;        // steady spin on its own axis
     renderer.render(scene, camera);
   }
   animate();
