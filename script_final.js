@@ -96,16 +96,18 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
 
   const scene = new THREE.Scene();
 
-  // Camera looking straight at the coin, slightly from above (matches photo)
+  // Camera looking straight at the coin
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-  camera.position.set(0, 1.0, 4.5);
+  camera.position.set(0, 0, 4.5);
   camera.lookAt(0, 0, 0);
 
-  // ── Coin construction using a Group for perfect texture control ──
+  // ── Coin construction: completely vertical (STANDING UP) ──
   const coin = new THREE.Group();
 
-  // 1. Gold edge: Y-aligned open cylinder
+  // 1. Gold edge: Cylinder rotated to face the camera (Z-aligned)
   const edgeGeo = new THREE.CylinderGeometry(1, 1, 0.22, 128, 1, true);
+  edgeGeo.rotateX(Math.PI / 2); // Make it stand up!
+  
   const goldMat = new THREE.MeshStandardMaterial({
     color: 0xFFD700,
     metalness: 0.9,
@@ -117,7 +119,7 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
   const edgeMesh = new THREE.Mesh(edgeGeo, goldMat);
   coin.add(edgeMesh);
 
-  // 2. Texture for the faces (no weird flips or rotations needed)
+  // 2. Textures
   const texLoader = new THREE.TextureLoader();
   const faceTex = texLoader.load('logo.png');
 
@@ -130,26 +132,25 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
     emissiveIntensity: 0.05,
   });
 
-  // 3. Front Face: CircleGeometry pointing UP (+Y)
+  // 3. Front Face: Circle pointing directly at camera (+Z)
   const frontGeo = new THREE.CircleGeometry(1, 128);
-  frontGeo.rotateX(-Math.PI / 2); // Rotate to face UP
+  // No rotation needed! CircleGeometry is perfectly upright by default facing +Z
   const frontMesh = new THREE.Mesh(frontGeo, faceMat);
-  frontMesh.position.y = 0.11; // Half of 0.22 thickness
+  frontMesh.position.z = 0.11; // Half of 0.22 thickness
   coin.add(frontMesh);
 
-  // 4. Back Face: CircleGeometry pointing DOWN (-Y)
+  // 4. Back Face: Circle pointing away from camera (-Z)
   const backGeo = new THREE.CircleGeometry(1, 128);
-  backGeo.rotateX(Math.PI / 2); // Rotate to face DOWN
+  backGeo.rotateY(Math.PI); // Rotate to face backwards, keeping UP as UP
   const backMesh = new THREE.Mesh(backGeo, faceMat);
-  backMesh.position.y = -0.11;
-  backMesh.scale.x = -1; // Flip X so it isn't mirrored when the coin spins around
+  backMesh.position.z = -0.11;
   coin.add(backMesh);
 
-  // Tilt ~25° so you see the face AND gold edge (matches photo)
-  coin.rotation.x = Math.PI * 0.14;
+  // NO TILT! Completely vertical.
+  coin.rotation.x = 0; 
   scene.add(coin);
 
-  // ── Lighting (Matches photo perfectly) ──
+  // ── Lighting ──
   const dirLight = new THREE.DirectionalLight(0xfffbe6, 4.0);
   dirLight.position.set(4, 6, 6);
   scene.add(dirLight);
@@ -172,7 +173,7 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
   // ── Animate ──
   function animate() {
     requestAnimationFrame(animate);
-    coin.rotation.y += 0.02; // Steady spin
+    coin.rotation.y += 0.02; // Spin like a wheel
     renderer.render(scene, camera);
   }
   animate();
