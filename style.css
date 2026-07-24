@@ -119,7 +119,7 @@ body {
   height: 340px;
   border-radius: 50%;
   object-fit: cover;
-  animation: spin 6s linear infinite;
+  animation: wobble 6s ease-in-out infinite;
   position: relative;
   z-index: 2;
   filter: drop-shadow(0 0 40px rgba(0,212,170,0.4));
@@ -136,9 +136,9 @@ body {
   animation: pulse 4s ease-in-out infinite;
   z-index: 1;
 }
-@keyframes spin {
-  0% { transform: rotateY(0deg); }
-  100% { transform: rotateY(360deg); }
+@keyframes wobble {
+  0%, 100% { transform: perspective(800px) rotateY(-15deg) rotateX(10deg) scale(1); }
+  50% { transform: perspective(800px) rotateY(15deg) rotateX(-10deg) scale(1.05); }
 }
 @keyframes pulse {
   0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 0.6; }
@@ -402,7 +402,7 @@ tr:hover td { background: rgba(0,212,170,0.03); }
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  animation: spin 6s linear infinite;
+  animation: wobble 6s ease-in-out infinite;
   filter: drop-shadow(0 0 20px rgba(0,212,170,0.3));
   transform-style: preserve-3d;
 }
