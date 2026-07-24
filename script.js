@@ -90,7 +90,7 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
   observer.observe(el);
 });
 
-// Coin tilt effect on mouse move
+// Coin tilt effect on mouse move for the 3D container
 const heroCoin = document.getElementById('heroCoin');
 if (heroCoin) {
   document.addEventListener('mousemove', e => {
@@ -98,6 +98,30 @@ if (heroCoin) {
     const cy = window.innerHeight / 2;
     const dx = (e.clientX - cx) / cx;
     const dy = (e.clientY - cy) / cy;
-    heroCoin.style.transform = `rotateY(${dx * 15}deg) rotateX(${-dy * 10}deg) translateY(${Math.sin(Date.now() / 1000) * 10}px)`;
+    // We add the base rotation animation inside CSS, so here we can just tweak the container
+    const container = heroCoin.parentElement;
+    container.style.transform = `rotateY(${dx * 15}deg) rotateX(${-dy * 10}deg) translateY(${Math.sin(Date.now() / 1000) * 10}px)`;
   });
 }
+
+// 3D Coin Generator
+document.querySelectorAll('.coin-3d').forEach(coin => {
+  // Front face
+  const front = document.createElement('div');
+  front.className = 'coin-face front';
+  coin.appendChild(front);
+  
+  // Back face
+  const back = document.createElement('div');
+  back.className = 'coin-face back';
+  coin.appendChild(back);
+  
+  // Thickness layers
+  const thickness = 20; // 20 pixels thick
+  for (let i = 1; i < thickness; i++) {
+    const layer = document.createElement('div');
+    layer.className = 'coin-layer';
+    layer.style.transform = `translateZ(-${i}px)`;
+    coin.appendChild(layer);
+  }
+});
