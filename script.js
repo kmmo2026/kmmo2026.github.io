@@ -101,48 +101,46 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
   camera.position.set(0, 0, 4.5);
   camera.lookAt(0, 0, 0);
 
-  // ── Coin geometry: CylinderGeometry(radiusTop, radiusBottom, height, segments)
-  const geo = new THREE.CylinderGeometry(1, 1, 0.16, 128, 1, false);
-  geo.rotateX(Math.PI / 2);
+  // ── Coin construction using a Group for perfect texture control ──
+  const coin = new THREE.Group();
 
-  // Gold metallic material for the edge
+  // 1. Gold edge: open-ended cylinder rotated to face camera (+Z axis)
+  const edgeGeo = new THREE.CylinderGeometry(1, 1, 0.16, 128, 1, true);
+  edgeGeo.rotateX(Math.PI / 2);
+
   const goldMat = new THREE.MeshStandardMaterial({
     color: 0xFFC000,
     metalness: 0.7,
     roughness: 0.3,
+    side: THREE.DoubleSide
   });
+  const edgeMesh = new THREE.Mesh(edgeGeo, goldMat);
+  coin.add(edgeMesh);
 
+  // 2. Texture for the faces (no weird flips or rotations needed)
   const texLoader = new THREE.TextureLoader();
-  
-  // Front face (Group 1: top face of cylinder)
-  const faceTexFront = texLoader.load('logo.png');
-  faceTexFront.center.set(0.5, 0.5);
-  // Instead of rotating 180 (which mirrors the K), we just flip it vertically
-  faceTexFront.repeat.set(1, -1);
-  faceTexFront.wrapT = THREE.RepeatWrapping;
+  const faceTex = texLoader.load('logo.png');
 
-  const faceMatFront = new THREE.MeshStandardMaterial({
-    map: faceTexFront,
+  const faceMat = new THREE.MeshStandardMaterial({
+    map: faceTex,
     metalness: 0.2,
     roughness: 0.5,
     color: 0xeeeeee,
   });
 
-  // Back face (Group 2: bottom face of cylinder)
-  const faceTexBack = texLoader.load('logo.png');
-  faceTexBack.center.set(0.5, 0.5);
-  faceTexBack.repeat.set(-1, 1); // Flip horizontally so K is not backwards when spun
-  faceTexBack.wrapS = THREE.RepeatWrapping;
+  // 3. Front Face: perfectly flat circle facing camera (+Z)
+  const frontGeo = new THREE.CircleGeometry(1, 128);
+  const frontMesh = new THREE.Mesh(frontGeo, faceMat);
+  frontMesh.position.z = 0.08; // Half the thickness (0.16 / 2)
+  coin.add(frontMesh);
 
-  const faceMatBack = new THREE.MeshStandardMaterial({
-    map: faceTexBack,
-    metalness: 0.2,
-    roughness: 0.5,
-    color: 0xeeeeee,
-  });
+  // 4. Back Face: perfectly flat circle facing away (-Z)
+  const backGeo = new THREE.CircleGeometry(1, 128);
+  backGeo.rotateY(Math.PI); // Rotate it to face backwards
+  const backMesh = new THREE.Mesh(backGeo, faceMat);
+  backMesh.position.z = -0.08;
+  coin.add(backMesh);
 
-  // CylinderGeometry: material array [edge, top, bottom]
-  const coin = new THREE.Mesh(geo, [goldMat, faceMatFront, faceMatBack]);
   scene.add(coin);
 
   // ── Lighting ──
