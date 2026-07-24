@@ -1,4 +1,4 @@
-// Particle background
+// ── Particles ──
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 let particles = [];
@@ -36,8 +36,6 @@ function drawParticles() {
     if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
     if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
   });
-
-  // Draw connecting lines between close particles
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
       const dx = particles[i].x - particles[j].x;
@@ -57,24 +55,23 @@ function drawParticles() {
 }
 drawParticles();
 
-// Navbar scroll effect
+// ── Navbar scroll ──
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
-  if (window.scrollY > 50) navbar.classList.add('scrolled');
-  else navbar.classList.remove('scrolled');
+  navbar.classList.toggle('scrolled', window.scrollY > 50);
 });
 
-// Smooth scroll for anchor links
+// ── Smooth scroll ──
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
-    const target = document.querySelector(a.getAttribute('href'));
-    if (target) target.scrollIntoView({ behavior: 'smooth' });
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) t.scrollIntoView({ behavior: 'smooth' });
   });
 });
 
-// Intersection Observer for card animations
-const observer = new IntersectionObserver((entries) => {
+// ── Card reveal on scroll ──
+const observer = new IntersectionObserver(entries => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       entry.target.style.opacity = '1';
@@ -90,38 +87,30 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
   observer.observe(el);
 });
 
-// Coin tilt effect on mouse move for the 3D container
-const heroCoin = document.getElementById('heroCoin');
-if (heroCoin) {
-  document.addEventListener('mousemove', e => {
-    const cx = window.innerWidth / 2;
-    const cy = window.innerHeight / 2;
-    const dx = (e.clientX - cx) / cx;
-    const dy = (e.clientY - cy) / cy;
-    // We add the base rotation animation inside CSS, so here we can just tweak the container
-    const container = heroCoin.parentElement;
-    container.style.transform = `rotateY(${dx * 15}deg) rotateX(${-dy * 10}deg) translateY(${Math.sin(Date.now() / 1000) * 10}px)`;
-  });
+// ── Real 3D Coin Builder ──
+// Builds a true cylinder: front face + ring of gold segments for thickness + back face
+function buildCoin(coinEl, radius, thickness) {
+  const SEGS = 80;                         // smoothness of the edge ring
+  const segW = (2 * Math.PI * radius) / SEGS + 0.5; // slight overlap to avoid gaps
+
+  for (let i = 0; i < SEGS; i++) {
+    const angle = (360 / SEGS) * i;
+    const seg = document.createElement('div');
+    seg.className = 'coin-edge-seg';
+    seg.style.width  = segW + 'px';
+    seg.style.marginLeft = -(segW / 2) + 'px';
+    seg.style.height = thickness + 'px';
+    seg.style.marginTop = -(thickness / 2) + 'px';
+    // rotate around Y-axis, push out to edge of circle
+    seg.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+    coinEl.appendChild(seg);
+  }
 }
 
-// 3D Coin Generator
-document.querySelectorAll('.coin-3d').forEach(coin => {
-  // Front face
-  const front = document.createElement('div');
-  front.className = 'coin-face front';
-  coin.appendChild(front);
-  
-  // Back face
-  const back = document.createElement('div');
-  back.className = 'coin-face back';
-  coin.appendChild(back);
-  
-  // Thickness layers
-  const thickness = 20; // 20 pixels thick
-  for (let i = 1; i < thickness; i++) {
-    const layer = document.createElement('div');
-    layer.className = 'coin-layer';
-    layer.style.transform = `translateZ(-${i}px)`;
-    coin.appendChild(layer);
-  }
-});
+// Main large coin (radius = 150 for 300px scene)
+const coinMain = document.getElementById('coinMain');
+if (coinMain) buildCoin(coinMain, 148, 40);
+
+// Small coin in download section (radius = 80 for 160px scene)
+const coinSmall = document.getElementById('coinSmall');
+if (coinSmall) buildCoin(coinSmall, 78, 30);
