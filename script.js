@@ -102,57 +102,61 @@ document.querySelectorAll('.feature-card, .token-card, .step-card').forEach(el =
   camera.lookAt(0, 0, 0);
 
   // ── Coin geometry: CylinderGeometry(radiusTop, radiusBottom, height, segments)
-  // By default, CylinderGeometry is aligned along the Y-axis (lying flat like a plate).
-  // We rotate it 90 degrees on X so it stands upright facing the camera.
-  const geo = new THREE.CylinderGeometry(1, 1, 0.22, 128, 1, false);
+  const geo = new THREE.CylinderGeometry(1, 1, 0.16, 128, 1, false);
   geo.rotateX(Math.PI / 2);
 
   // Gold metallic material for the edge
   const goldMat = new THREE.MeshStandardMaterial({
-    color: 0xFFD700,
-    metalness: 0.9,
-    roughness: 0.1,
-    emissive: 0xaa7700,
-    emissiveIntensity: 0.15,
+    color: 0xFFC000,
+    metalness: 0.7,
+    roughness: 0.3,
   });
 
-  // Face material — load the coin image as texture
   const texLoader = new THREE.TextureLoader();
-  const faceTex = texLoader.load('logo.png');
-  faceTex.center.set(0.5, 0.5);
+  
+  // Front face (Group 1: top face of cylinder)
+  const faceTexFront = texLoader.load('logo.png');
+  faceTexFront.center.set(0.5, 0.5);
+  faceTexFront.rotation = Math.PI; // Fix upside-down orientation
 
-  const faceMat = new THREE.MeshStandardMaterial({
-    map: faceTex,
-    metalness: 0.3,
-    roughness: 0.2,
-    color: 0xffffff,
-    emissive: 0x111111,
-    emissiveIntensity: 0.05,
+  const faceMatFront = new THREE.MeshStandardMaterial({
+    map: faceTexFront,
+    metalness: 0.2,
+    roughness: 0.5,
+    color: 0xeeeeee,
+  });
+
+  // Back face (Group 2: bottom face of cylinder)
+  const faceTexBack = texLoader.load('logo.png');
+  faceTexBack.center.set(0.5, 0.5);
+  faceTexBack.repeat.set(-1, 1); // Flip horizontally so K is not backwards when spun
+  faceTexBack.wrapS = THREE.RepeatWrapping;
+
+  const faceMatBack = new THREE.MeshStandardMaterial({
+    map: faceTexBack,
+    metalness: 0.2,
+    roughness: 0.5,
+    color: 0xeeeeee,
   });
 
   // CylinderGeometry: material array [edge, top, bottom]
-  const coin = new THREE.Mesh(geo, [goldMat, faceMat, faceMat]);
-  // Coin stands perfectly vertical, no tilt needed
+  const coin = new THREE.Mesh(geo, [goldMat, faceMatFront, faceMatBack]);
   scene.add(coin);
 
   // ── Lighting ──
-  const dirLight = new THREE.DirectionalLight(0xfffbe6, 4.0);
-  dirLight.position.set(4, 6, 6);
+  const dirLight = new THREE.DirectionalLight(0xfffbe6, 1.5);
+  dirLight.position.set(2, 4, 3);
   scene.add(dirLight);
 
-  const tealLight = new THREE.PointLight(0x00d4aa, 3.5, 20);
-  tealLight.position.set(-4, 2, 4);
+  const tealLight = new THREE.PointLight(0x00d4aa, 1.5, 20);
+  tealLight.position.set(-3, 1, 3);
   scene.add(tealLight);
 
-  const fillLight = new THREE.PointLight(0xffe5a0, 2.5, 15);
-  fillLight.position.set(3, -3, 3);
+  const fillLight = new THREE.PointLight(0xffe5a0, 1.0, 15);
+  fillLight.position.set(3, -2, 2);
   scene.add(fillLight);
 
-  const backLight = new THREE.DirectionalLight(0xffffff, 1.5);
-  backLight.position.set(-3, 0, -3);
-  scene.add(backLight);
-
-  const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
   scene.add(ambient);
 
   // ── Animate: spin only on Y axis ──
